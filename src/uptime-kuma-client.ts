@@ -21,6 +21,7 @@ import type {
   StatusPage,
   DockerHost,
 } from './types/index.js';
+import { normaliseMsg } from './utils/normalize-msg.js';
 
 /**
  * How long a post-write read-back waits for the server's acknowledgement before giving up.
@@ -481,13 +482,9 @@ export class UptimeKumaClient {
    */
   static normaliseHeartbeat(beat: Heartbeat): Heartbeat {
     const rawMsg = (beat as Heartbeat & { msg: unknown }).msg;
-    const msg = typeof rawMsg === 'number'
-      ? String(rawMsg)
-      : Array.isArray(rawMsg)
-        ? rawMsg.join(', ')
-        : rawMsg;
+    const msg = normaliseMsg(rawMsg);
 
-    return msg === rawMsg ? beat : { ...beat, msg };
+    return msg === rawMsg ? beat : { ...beat, msg: msg as Heartbeat['msg'] };
   }
 
   static normaliseBeats(list: Heartbeat[]): Heartbeat[] {
